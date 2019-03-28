@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.Optional;
 
 /**
@@ -168,6 +169,19 @@ public class ParametersUtils {
                 e.setValue(value);
             }
         }
+
+        //
+        for (Entry<String, Object> e : input.entrySet()) {
+			if (e.getKey().contains(".")){
+				String[] keyParams = e.getKey().split(Pattern.quote("."));
+				Map<String, Object> entry = (Map<String, Object>)input.get(keyParams[0]);
+				if (entry != null){
+					entry.put(keyParams[1], e.getValue());
+					input.remove(e.getKey());
+				}
+			}
+        }
+        
         return input;
     }
 

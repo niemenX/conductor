@@ -94,5 +94,29 @@ public class TestParametersUtils {
 		assertNull(replaced.get("k3"));
 		assertEquals("conductor", replaced.get("k4"));
 		assertEquals(2, replaced.get("k5"));
+	}
+	
+	@Test
+    public void testReplaceWithMapExpandandInject() {
+        Map<String, Object> map = new HashMap<>();
+		map.put("externalId", "{\"taskRefName\":\"t001\",\"workflowId\":\"w002\"}");
+		map.put("name", "conductor");
+		map.put("version", 2);
+		jsonUtils.expand(map);
+
+        Map<String, Object> input = new HashMap<>();
+		input.put("k1", "${$.externalId}");
+		input.put("k2", "${externalId.taskRefName}");
+		input.put("k4", "${name}");
+		input.put("k5", "${version}");
+		input.put("test.asd", "${version}");
+
+		Map<String, Object> replaced = parametersUtils.replace(input, map);
+		assertNotNull(replaced);
+		assertEquals("t001", replaced.get("k2"));
+		assertNull(replaced.get("k3"));
+		assertEquals("conductor", replaced.get("k4"));
+		assertEquals(2, replaced.get("k5"));
+		assertEquals(2, replaced.get("test.asd"));
     }
 }
