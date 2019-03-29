@@ -44,6 +44,12 @@ if [ -n "$CONFIG_ELASTICSEARCH_INDEX" ];
   else
     sed -i "/workflow\.elasticsearch\.index\.name\=.*/d" /app/config/$CONFIG_PROP
 fi
+if [ -n "$CONFIG_ELASTICSEARCH_TASKLOG_INDEX" ];
+  then
+    sed -i "s/^\(workflow\.elasticsearch\.tasklog\.index\.name\s*=\s*\).*$/\1$CONFIG_ELASTICSEARCH_TASKLOG_INDEX/" /app/config/$CONFIG_PROP
+  else
+    sed -i "/workflow\.elasticsearch\.tasklog\.index\.name\=.*/d" /app/config/$CONFIG_PROP
+fi
 if [ -n "$CONFIG_LOAD_SAMPLE" ];
   then
     sed -i "s/^\(loadSample\s*=\s*\).*$/\1$CONFIG_LOAD_SAMPLE/" /app/config/$CONFIG_PROP
