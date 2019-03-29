@@ -32,6 +32,13 @@ if [ -n "$CONFIG_NAMESPACE_PREFIX" ];
   else
     echo "DEFAULT NAMESPACE PREFIX";
 fi
+if [ -n "$CONFIG_ELASTICSEARCH_INSTANCETYPE" ];
+  then
+    sed -i "s/^\(workflow\.elasticsearch\.instanceType\s*=\s*\).*$/\1$CONFIG_ELASTICSEARCH_INSTANCETYPE/" /app/config/$CONFIG_PROP
+  else
+    sed -i "/workflow\.elasticsearch\.instanceType\=.*/d" /app/config/$CONFIG_PROP
+fi
+
 if [ -n "$CONFIG_ELASTICSEARCH_URL" ];
   then
     sed -i "s/^\(workflow\.elasticsearch\.url\s*=\s*\).*$/\1$CONFIG_ELASTICSEARCH_URL/" /app/config/$CONFIG_PROP
@@ -71,7 +78,6 @@ if [ -n "$CONFIG_NATS_CLUSTER" ];
     echo "DEFAULT NATS CLUSTER";
 fi
 
-
 if [ -n "$CONFIG_NATS_CLIENTID" ];
   then
     sed -i "s/^\(io\.nats\.streaming\.clientId\s*=\s*\).*$/\1$CONFIG_NATS_CLIENTID/" /app/config/$CONFIG_PROP
@@ -79,14 +85,12 @@ if [ -n "$CONFIG_NATS_CLIENTID" ];
     echo "DEFAULT NATS CLIENTID";
 fi
 
-
 if [ -n "$CONFIG_NATS_QGROUP" ];
   then
     sed -i "s/^\(io\.nats\.streaming\.qGroup\s*=\s*\).*$/\1$CONFIG_NATS_QGROUP/" /app/config/$CONFIG_PROP
   else
     echo "DEFAULT NATS QGROUP";
 fi
-
 
 if [ -n "$CONFIG_NATS_DURABLENAME" ];
   then
