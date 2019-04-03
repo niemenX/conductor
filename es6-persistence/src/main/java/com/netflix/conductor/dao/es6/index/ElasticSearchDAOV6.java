@@ -170,7 +170,7 @@ public class ElasticSearchDAOV6 extends ElasticSearchBaseDAO implements IndexDAO
         elasticSearchClient.admin()
                 .cluster()
                 .prepareHealth()
-                .setWaitForGreenStatus()
+                //.setWaitForGreenStatus()
                 .execute()
                 .get();
     }
