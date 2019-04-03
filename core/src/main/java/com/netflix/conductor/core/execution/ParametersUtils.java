@@ -177,7 +177,6 @@ public class ParametersUtils {
 				Map<String, Object> entry = (Map<String, Object>)input.get(keyParams[0]);
 				if (entry != null){
 					entry.put(keyParams[1], e.getValue());
-					input.remove(e.getKey());
 				}
 			}
         }
