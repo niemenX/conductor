@@ -56,6 +56,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
+import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
@@ -325,10 +326,13 @@ public class ElasticSearchDAOV6 extends ElasticSearchBaseDAO implements IndexDAO
         try {
             BoolQueryBuilder query = boolQueryBuilder("taskId='" + taskId + "'", "*");
 
+            FieldSortBuilder builder = SortBuilders.fieldSort("createdTime").order(SortOrder.ASC);
+            builder.unmappedType("long");
+
             final SearchRequestBuilder srb = elasticSearchClient.prepareSearch(logIndexPrefix + "*")
                     .setQuery(query)
                     .setTypes(LOG_DOC_TYPE)
-                    .addSort(SortBuilders.fieldSort("createdTime").order(SortOrder.ASC));
+                    .addSort(builder);
 
             return mapTaskExecLogsResponse(srb.execute().actionGet());
         } catch (Exception e) {

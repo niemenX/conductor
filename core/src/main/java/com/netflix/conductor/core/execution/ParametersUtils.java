@@ -169,18 +169,23 @@ public class ParametersUtils {
                 e.setValue(value);
             }
         }
+        
+        return replaceObjectFields(input);
+    }
 
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> replaceObjectFields(Map<String, Object> input) {
         //
         for (Entry<String, Object> e : input.entrySet()) {
-			if (e.getKey().contains(".")){
-				String[] keyParams = e.getKey().split(Pattern.quote("."));
-				Map<String, Object> entry = (Map<String, Object>)input.get(keyParams[0]);
-				if (entry != null){
-					entry.put(keyParams[1], e.getValue());
-				}
-			}
+            if (e.getKey().contains(".")) {
+                String[] keyParams = e.getKey().split(Pattern.quote("."));
+                Map<String, Object> entry = (Map<String, Object>) input.get(keyParams[0]);
+                if (entry != null) {
+                    entry.put(keyParams[1], e.getValue());
+                }
+            }
         }
-        
+
         return input;
     }
 
