@@ -21,7 +21,6 @@ import com.netflix.conductor.common.metadata.tasks.PollData;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.Task.Status;
 import com.netflix.conductor.common.metadata.tasks.TaskDef;
-import com.netflix.conductor.common.metadata.workflow.SubWorkflowParams;
 import com.netflix.conductor.common.metadata.workflow.TaskType;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import com.netflix.conductor.common.metadata.workflow.WorkflowTask;
@@ -65,6 +64,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.netflix.conductor.core.execution.tasks.SubWorkflow.SUB_WORKFLOW_ID;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.maxBy;
@@ -76,8 +76,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -631,7 +631,6 @@ public class TestWorkflowExecutor {
     }
 
 
-
     @Test
     public void testRetryWorkflowMultipleRetries() {
         //setup
@@ -806,6 +805,90 @@ public class TestWorkflowExecutor {
     }
 
     @Test
+    public void testInactiveDomains() {
+        String taskType = "test-task";
+        String[] domains = new String[]{"domain1", "domain2"};
+
+        PollData pollData1 = new PollData("queue1", domains[0], "worker1", System.currentTimeMillis() - 99 * 10000);
+        when(executionDAOFacade.getTaskPollDataByDomain(taskType, domains[0])).thenReturn(pollData1);
+        when(executionDAOFacade.getTaskPollDataByDomain(taskType, domains[1])).thenReturn(null);
+        String activeDomain = workflowExecutor.getActiveDomain(taskType, domains);
+        assertEquals("domain2", activeDomain);
+    }
+
+    @Test
+    public void testDefaultDomain() {
+        String taskType = "test-task";
+        String[] domains = new String[]{"domain1", "domain2", "NO_DOMAIN"};
+
+        PollData pollData1 = new PollData("queue1", domains[0], "worker1", System.currentTimeMillis() - 99 * 10000);
+        when(executionDAOFacade.getTaskPollDataByDomain(taskType, domains[0])).thenReturn(pollData1);
+        when(executionDAOFacade.getTaskPollDataByDomain(taskType, domains[1])).thenReturn(null);
+        String activeDomain = workflowExecutor.getActiveDomain(taskType, domains);
+        assertEquals(null, activeDomain);
+    }
+
+    @Test
+    public void testTaskToDomain() {
+        Workflow workflow = generateSampleWorkflow();
+        List<Task> tasks = generateSampleTasks(3);
+
+        Map<String, String> taskToDomain = new HashMap<>();
+        taskToDomain.put("*", "mydomain");
+        workflow.setTaskToDomain(taskToDomain);
+
+        PollData pollData1 = new PollData("queue1", "mydomain", "worker1", System.currentTimeMillis() - 99 * 100);
+        when(executionDAOFacade.getTaskPollDataByDomain(anyString(), anyString())).thenReturn(pollData1);
+        workflowExecutor.setTaskDomains(tasks, workflow);
+
+        tasks.forEach(task -> assertEquals("mydomain", task.getDomain()));
+    }
+
+    @Test
+    public void testTaskToDomainsPerTask() {
+        Workflow workflow = generateSampleWorkflow();
+        List<Task> tasks = generateSampleTasks(2);
+
+        Map<String, String> taskToDomain = new HashMap<>();
+        taskToDomain.put("*", "mydomain, NO_DOMAIN");
+        workflow.setTaskToDomain(taskToDomain);
+
+        PollData pollData1 = new PollData("queue1", "mydomain", "worker1", System.currentTimeMillis() - 99 * 100);
+        when(executionDAOFacade.getTaskPollDataByDomain(eq("task1"), anyString())).thenReturn(pollData1);
+        when(executionDAOFacade.getTaskPollDataByDomain(eq("task2"), anyString())).thenReturn(null);
+        workflowExecutor.setTaskDomains(tasks, workflow);
+
+        assertEquals("mydomain", tasks.get(0).getDomain());
+        assertNull(tasks.get(1).getDomain());
+    }
+
+    @Test
+    public void testTaskToDomainOverrides() {
+        Workflow workflow = generateSampleWorkflow();
+        List<Task> tasks = generateSampleTasks(4);
+
+        Map<String, String> taskToDomain = new HashMap<>();
+        taskToDomain.put("*", "mydomain");
+        taskToDomain.put("task2", "someInactiveDomain, NO_DOMAIN");
+        taskToDomain.put("task3", "someActiveDomain, NO_DOMAIN");
+        taskToDomain.put("task4", "someInactiveDomain, someInactiveDomain2");
+        workflow.setTaskToDomain(taskToDomain);
+
+        PollData pollData1 = new PollData("queue1", "mydomain", "worker1", System.currentTimeMillis() - 99 * 100);
+        PollData pollData2 = new PollData("queue2", "someActiveDomain", "worker2", System.currentTimeMillis() - 99 * 100);
+        when(executionDAOFacade.getTaskPollDataByDomain(anyString(), eq("mydomain"))).thenReturn(pollData1);
+        when(executionDAOFacade.getTaskPollDataByDomain(anyString(), eq("someInactiveDomain"))).thenReturn(null);
+        when(executionDAOFacade.getTaskPollDataByDomain(anyString(), eq("someActiveDomain"))).thenReturn(pollData2);
+        when(executionDAOFacade.getTaskPollDataByDomain(anyString(), eq("someInactiveDomain"))).thenReturn(null);
+        workflowExecutor.setTaskDomains(tasks, workflow);
+
+        assertEquals("mydomain", tasks.get(0).getDomain());
+        assertNull(tasks.get(1).getDomain());
+        assertEquals("someActiveDomain", tasks.get(2).getDomain());
+        assertEquals("someInactiveDomain2", tasks.get(3).getDomain());
+    }
+
+    @Test
     public void testDedupAndAddTasks() {
         Workflow workflow = new Workflow();
 
@@ -839,4 +922,101 @@ public class TestWorkflowExecutor {
         assertEquals(newTask, taskList.get(0));
         assertEquals(3, workflow.getTasks().size());
     }
+
+    @Test
+    public void testRollbackTasks() {
+        String workflowId = "workflow-id";
+
+        Task task1 = new Task();
+        task1.setTaskType(TaskType.SIMPLE.name());
+        task1.setTaskDefName("simpleTask");
+        task1.setReferenceTaskName("simpleTask");
+        task1.setWorkflowInstanceId(workflowId);
+        task1.setScheduledTime(System.currentTimeMillis());
+        task1.setTaskId(IDGenerator.generate());
+        task1.setStatus(Status.SCHEDULED);
+
+        WorkflowTask waitTask = new WorkflowTask();
+        waitTask.setWorkflowTaskType(TaskType.WAIT);
+        waitTask.setType(TaskType.WAIT.name());
+        waitTask.setTaskReferenceName("wait");
+        Task task2 = new Task();
+        task2.setTaskType(waitTask.getType());
+        task2.setTaskDefName(waitTask.getName());
+        task2.setReferenceTaskName(waitTask.getTaskReferenceName());
+        task2.setWorkflowInstanceId(workflowId);
+        task2.setScheduledTime(System.currentTimeMillis());
+        task2.setTaskId(IDGenerator.generate());
+        task2.setStatus(Status.IN_PROGRESS);
+        task2.setRetryCount(0);
+        task2.setWorkflowTask(waitTask);
+
+        WorkflowTask subWorkflowTask = new WorkflowTask();
+        subWorkflowTask.setWorkflowTaskType(TaskType.SUB_WORKFLOW);
+        subWorkflowTask.setType(TaskType.SUB_WORKFLOW.name());
+        subWorkflowTask.setTaskReferenceName("sub-workflow");
+        Task task3 = new Task();
+        task3.setTaskType(subWorkflowTask.getType());
+        task3.setTaskDefName(subWorkflowTask.getName());
+        task3.setReferenceTaskName(subWorkflowTask.getTaskReferenceName());
+        task3.setWorkflowInstanceId(workflowId);
+        task3.setScheduledTime(System.currentTimeMillis());
+        task3.setTaskId(IDGenerator.generate());
+        task3.setStatus(Status.IN_PROGRESS);
+        task3.setRetryCount(0);
+        task3.setWorkflowTask(subWorkflowTask);
+        task3.setOutputData(new HashMap<>());
+        task3.getOutputData().put(SUB_WORKFLOW_ID, IDGenerator.generate());
+
+        AtomicInteger removeWorkflowCalledCounter = new AtomicInteger(0);
+        doAnswer(invocation -> {
+            removeWorkflowCalledCounter.incrementAndGet();
+            return null;
+        }).when(executionDAOFacade).removeWorkflow(anyString(), anyBoolean());
+
+        AtomicInteger removeTaskCalledCounter = new AtomicInteger(0);
+        doAnswer(invocation -> {
+            removeTaskCalledCounter.incrementAndGet();
+            return null;
+        }).when(executionDAOFacade).removeTask(anyString());
+
+        workflowExecutor.rollbackTasks(workflowId, Arrays.asList(task1, task2, task3));
+        assertEquals(1, removeWorkflowCalledCounter.get());
+        assertEquals(3, removeTaskCalledCounter.get());
+    }
+
+    private Workflow generateSampleWorkflow() {
+        //setup
+        Workflow workflow = new Workflow();
+        workflow.setWorkflowId("testRetryWorkflowId");
+        workflow.setWorkflowType("testRetryWorkflowId");
+        workflow.setVersion(1);
+        workflow.setOwnerApp("junit_testRetryWorkflowId");
+        workflow.setStartTime(10L);
+        workflow.setEndTime(100L);
+        //noinspection unchecked
+        workflow.setOutput(Collections.EMPTY_MAP);
+        workflow.setStatus(Workflow.WorkflowStatus.FAILED);
+
+        return workflow;
+    }
+
+    private List<Task> generateSampleTasks(int count) {
+        if (count == 0) return null;
+        List<Task> tasks = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Task task = new Task();
+            task.setTaskId(UUID.randomUUID().toString());
+            task.setSeq(i);
+            task.setRetryCount(1);
+            task.setTaskType("task" + (i+1));
+            task.setStatus(Status.COMPLETED);
+            task.setTaskDefName("taskX");
+            task.setReferenceTaskName("task_ref" + (i+1));
+            tasks.add(task);
+        }
+
+        return tasks;
+    }
+
 }
