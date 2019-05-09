@@ -7,6 +7,14 @@ echo "Starting Conductor server"
 cd /app/libs
 echo "Property file: $CONFIG_PROP"
 echo $CONFIG_PROP
+
+if [ -n "$CONFIG_LOAD_SAMPLE" ];
+  then
+    sed -i "s/^\(loadSample\s*=\s*\).*$/\1$CONFIG_LOAD_SAMPLE/" /app/config/$CONFIG_PROP
+  else
+    echo "DEFAULT LOAD SAMPLE";
+fi
+
 export config_file=
 
 if [ -z "$CONFIG_PROP" ];
