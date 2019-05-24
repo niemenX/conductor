@@ -391,8 +391,8 @@ public class WorkflowExecutor {
             throw new ApplicationException(CONFLICT, String.format("Workflow: %s is non-restartable", workflow));
         }
 
-        // Remove all the tasks...
-        workflow.getTasks().forEach(task -> executionDAOFacade.removeTask(task.getTaskId()));
+        // Remove the workflow from the primary datastore (archive in indexer) and re-create it
+        executionDAOFacade.removeWorkflow(workflowId, true);
         workflow.getTasks().clear();
         workflow.setReasonForIncompletion(null);
         workflow.setStartTime(System.currentTimeMillis());
@@ -401,7 +401,7 @@ public class WorkflowExecutor {
         workflow.setStatus(WorkflowStatus.RUNNING);
         workflow.setOutput(null);
         workflow.setExternalOutputPayloadStoragePath(null);
-        executionDAOFacade.updateWorkflow(workflow);
+        executionDAOFacade.createWorkflow(workflow);
         decide(workflowId);
     }
 
@@ -1161,7 +1161,9 @@ public class WorkflowExecutor {
                 if (workflowSystemTask == null) {
                     throw new ApplicationException(NOT_FOUND, "No system task found by name " + task.getTaskType());
                 }
-                task.setStartTime(System.currentTimeMillis());
+                if (task.getStatus() != null && !task.getStatus().isTerminal() && task.getStartTime() == 0) {
+                    task.setStartTime(System.currentTimeMillis());
+                }
                 if (!workflowSystemTask.isAsync()) {
                     try {
                         workflowSystemTask.start(workflow, task, this);
@@ -1298,9 +1300,17 @@ public class WorkflowExecutor {
                     executionDAOFacade.removeTask(task.getTaskId());
                 }
             }
+            //reset fields before restarting the task
+            rerunFromTask.setScheduledTime(System.currentTimeMillis());
+            rerunFromTask.setStartTime(0);
+            rerunFromTask.setUpdateTime(0);
+            rerunFromTask.setEndTime(0);
+            rerunFromTask.setOutputData(null);
+            rerunFromTask.setExternalOutputPayloadStoragePath(null);
             if (rerunFromTask.getTaskType().equalsIgnoreCase(SubWorkflow.NAME)) {
-                // if task is sub workflow set task as IN_PROGRESS
+                // if task is sub workflow set task as IN_PROGRESS and reset start time
                 rerunFromTask.setStatus(IN_PROGRESS);
+                rerunFromTask.setStartTime(System.currentTimeMillis());
             } else {
                 // Set the task to rerun as SCHEDULED
                 rerunFromTask.setStatus(SCHEDULED);
