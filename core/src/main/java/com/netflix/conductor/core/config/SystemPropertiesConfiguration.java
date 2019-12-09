@@ -149,6 +149,11 @@ public class SystemPropertiesConfiguration implements Configuration {
     }
 
     @Override
+    public int getRedisTTL() {
+        return getIntProperty(REDIS_TTL, -1);
+    }
+
+    @Override
     public String getProperty(String key, String defaultValue) {
         String val;
         val = System.getenv(key.replace('.', '_'));

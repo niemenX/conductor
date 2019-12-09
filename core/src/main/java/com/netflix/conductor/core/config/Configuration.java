@@ -24,6 +24,8 @@ public interface Configuration {
     String DB_PROPERTY_NAME = "db";
     String DB_DEFAULT_VALUE = "memory";
 
+    String REDIS_TTL = "redis.ttl";
+
     String SWEEP_FREQUENCY_PROPERTY_NAME = "decider.sweep.frequency.seconds";
     int SWEEP_FREQUENCY_DEFAULT_VALUE = 30;
 
@@ -65,6 +67,11 @@ public interface Configuration {
         return getProperty(DB_PROPERTY_NAME, DB_DEFAULT_VALUE).toUpperCase();
     }
 
+     /**
+     * @return redis ttl in seconds
+     */
+    int getRedisTTL();
+    
     /**
      * @return time frequency in seconds, at which the workflow sweeper should run to evaluate running workflows.
      */

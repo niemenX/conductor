@@ -48,6 +48,10 @@ public class BaseDynoDAO {
         this.domain = config.getProperty("workflow.dyno.keyspace.domain", null);
     }
 
+    public int ttl() {
+        return this.config.getRedisTTL();
+    }
+
     String nsKey(String... nsValues) {
         String rootNamespace = config.getProperty("workflow.namespace.prefix", null);
         StringBuilder namespacedKey = new StringBuilder();

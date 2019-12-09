@@ -23,6 +23,12 @@ import java.util.Map;
 public class TestConfiguration implements CassandraConfiguration {
 
     @Override
+    public int getRedisTTL() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
     public int getSweepFrequency() {
         return 1;
     }
