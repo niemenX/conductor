@@ -34,11 +34,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-<<<<<<< HEAD
-import java.util.regex.Pattern;
-import java.util.Optional;
-=======
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
 
 import com.netflix.conductor.common.utils.JsonMapperProvider;
 import com.netflix.conductor.common.utils.TaskUtils;
@@ -183,28 +178,7 @@ public class ParametersUtils {
             }
             result.put(e.getKey(), newValue);
         }
-<<<<<<< HEAD
-        
-        return replaceObjectFields(input);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> replaceObjectFields(Map<String, Object> input) {
-        //
-        for (Entry<String, Object> e : input.entrySet()) {
-            if (e.getKey().contains(".")) {
-                String[] keyParams = e.getKey().split(Pattern.quote("."));
-                Map<String, Object> entry = (Map<String, Object>) input.get(keyParams[0]);
-                if (entry != null) {
-                    entry.put(keyParams[1], e.getValue());
-                }
-            }
-        }
-
-        return input;
-=======
         return result;
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
     }
 
     @SuppressWarnings("unchecked")

@@ -1,21 +1,12 @@
 {
     "compile": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -33,8 +24,6 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
@@ -43,7 +32,6 @@
             "locked": "2.0.3",
             "requested": "2.0.3"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.apache.commons:commons-lang3": {
             "locked": "3.0",
             "requested": "3.0"
@@ -52,13 +40,6 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-=======
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",
             "requested": "1.7.25"
@@ -66,21 +47,12 @@
     },
     "compileClasspath": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -98,8 +70,6 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
@@ -108,7 +78,6 @@
             "locked": "2.0.3",
             "requested": "2.0.3"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.apache.commons:commons-lang3": {
             "locked": "3.0",
             "requested": "3.0"
@@ -117,13 +86,6 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-=======
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",
             "requested": "1.7.25"
@@ -131,21 +93,12 @@
     },
     "default": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -163,8 +116,6 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
@@ -173,7 +124,6 @@
             "locked": "2.0.3",
             "requested": "2.0.3"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.apache.commons:commons-lang3": {
             "locked": "3.0",
             "requested": "3.0"
@@ -182,13 +132,6 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-=======
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",
             "requested": "1.7.25"
@@ -202,31 +145,17 @@
     },
     "jacocoAnt": {
         "org.jacoco:org.jacoco.ant": {
-<<<<<<< HEAD
-            "locked": "0.8.1",
-            "requested": "0.8.1"
-=======
             "locked": "0.8.1"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         }
     },
     "runtime": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -244,8 +173,6 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
@@ -254,7 +181,6 @@
             "locked": "2.0.3",
             "requested": "2.0.3"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.apache.commons:commons-lang3": {
             "locked": "3.0",
             "requested": "3.0"
@@ -263,13 +189,6 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-=======
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",
             "requested": "1.7.25"
@@ -277,21 +196,12 @@
     },
     "runtimeClasspath": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -309,8 +219,6 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
@@ -319,7 +227,6 @@
             "locked": "2.0.3",
             "requested": "2.0.3"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.apache.commons:commons-lang3": {
             "locked": "3.0",
             "requested": "3.0"
@@ -328,13 +235,6 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-=======
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",
             "requested": "1.7.25"
@@ -342,21 +242,12 @@
     },
     "testCompile": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -374,13 +265,10 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "junit:junit": {
             "locked": "4.12",
             "requested": "4.12"
@@ -397,19 +285,9 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-        "org.mockito:mockito-core": {
-            "locked": "1.10.19",
-            "requested": "1.10.19"
-=======
         "org.mockito:mockito-core": {
             "locked": "3.1.0",
             "requested": "3.1.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",
@@ -418,21 +296,12 @@
     },
     "testCompileClasspath": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -450,13 +319,10 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "junit:junit": {
             "locked": "4.12",
             "requested": "4.12"
@@ -473,19 +339,9 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-        "org.mockito:mockito-core": {
-            "locked": "1.10.19",
-            "requested": "1.10.19"
-=======
         "org.mockito:mockito-core": {
             "locked": "3.1.0",
             "requested": "3.1.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",
@@ -494,21 +350,12 @@
     },
     "testRuntime": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -526,13 +373,10 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "junit:junit": {
             "locked": "4.12",
             "requested": "4.12"
@@ -549,19 +393,9 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-        "org.mockito:mockito-core": {
-            "locked": "1.10.19",
-            "requested": "1.10.19"
-=======
         "org.mockito:mockito-core": {
             "locked": "3.1.0",
             "requested": "3.1.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",
@@ -570,21 +404,12 @@
     },
     "testRuntimeClasspath": {
         "com.fasterxml.jackson.core:jackson-core": {
-<<<<<<< HEAD
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-        },
-        "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.7.5",
-            "requested": "2.7.5"
-=======
             "locked": "2.10.0",
             "requested": "2.10.0"
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.10.0",
             "requested": "2.10.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "com.github.rholder:guava-retrying": {
             "locked": "2.0.0",
@@ -602,13 +427,10 @@
             "locked": "1",
             "requested": "1"
         },
-<<<<<<< HEAD
-=======
         "javax.validation:validation-api": {
             "locked": "2.0.1.Final",
             "requested": "2.0.1.Final"
         },
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         "junit:junit": {
             "locked": "4.12",
             "requested": "4.12"
@@ -625,19 +447,9 @@
             "locked": "3.0.0",
             "requested": "3.0.0"
         },
-<<<<<<< HEAD
-        "org.hibernate:hibernate-validator": {
-            "locked": "6.0.13.Final",
-            "requested": "6.0.13.Final"
-        },
-        "org.mockito:mockito-core": {
-            "locked": "1.10.19",
-            "requested": "1.10.19"
-=======
         "org.mockito:mockito-core": {
             "locked": "3.1.0",
             "requested": "3.1.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.25",

@@ -7,12 +7,7 @@
     },
     "jacocoAnt": {
         "org.jacoco:org.jacoco.ant": {
-<<<<<<< HEAD
-            "locked": "0.8.1",
-            "requested": "0.8.1"
-=======
             "locked": "0.8.1"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         }
     },
     "testCompile": {
@@ -21,13 +16,8 @@
             "requested": "4.12"
         },
         "org.mockito:mockito-core": {
-<<<<<<< HEAD
-            "locked": "1.10.19",
-            "requested": "1.10.19"
-=======
             "locked": "3.1.0",
             "requested": "3.1.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         }
     },
     "testCompileClasspath": {
@@ -36,13 +26,8 @@
             "requested": "4.12"
         },
         "org.mockito:mockito-core": {
-<<<<<<< HEAD
-            "locked": "1.10.19",
-            "requested": "1.10.19"
-=======
             "locked": "3.1.0",
             "requested": "3.1.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         }
     },
     "testRuntime": {
@@ -51,13 +36,8 @@
             "requested": "4.12"
         },
         "org.mockito:mockito-core": {
-<<<<<<< HEAD
-            "locked": "1.10.19",
-            "requested": "1.10.19"
-=======
             "locked": "3.1.0",
             "requested": "3.1.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         }
     },
     "testRuntimeClasspath": {
@@ -66,13 +46,8 @@
             "requested": "4.12"
         },
         "org.mockito:mockito-core": {
-<<<<<<< HEAD
-            "locked": "1.10.19",
-            "requested": "1.10.19"
-=======
             "locked": "3.1.0",
             "requested": "3.1.0"
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
         }
     }
 }

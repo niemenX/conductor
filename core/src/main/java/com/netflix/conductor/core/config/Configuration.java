@@ -149,13 +149,6 @@ public interface Configuration {
         return getProperty(DB_PROPERTY_NAME, DB_DEFAULT_VALUE).toUpperCase();
     }
 
-<<<<<<< HEAD
-     /**
-     * @return redis ttl in seconds
-     */
-    int getRedisTTL();
-    
-=======
     default String getLockingServerString() {
         return getProperty(LOCKING_SERVER_PROPERTY_NAME, LOCKING_SERVER_DEFAULT_VALUE).toUpperCase();
     }
@@ -227,7 +220,6 @@ public interface Configuration {
         return getIntProperty(SYSTEM_TASK_MAX_POLL_COUNT_PROPERTY_NAME, SYSTEM_TASK_MAX_POLL_COUNT_DEFAULT_VALUE);
     }
 
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
     /**
      * @return time frequency in seconds, at which the workflow sweeper should run to evaluate running workflows.
      */

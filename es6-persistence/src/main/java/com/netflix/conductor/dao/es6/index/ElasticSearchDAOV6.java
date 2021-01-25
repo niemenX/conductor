@@ -440,22 +440,12 @@ public class ElasticSearchDAOV6 extends ElasticSearchBaseDAO implements IndexDAO
         try {
             BoolQueryBuilder query = boolQueryBuilder("taskId='" + taskId + "'", "*");
 
-<<<<<<< HEAD
-            FieldSortBuilder builder = SortBuilders.fieldSort("createdTime").order(SortOrder.ASC);
-            builder.unmappedType("long");
-
-            final SearchRequestBuilder srb = elasticSearchClient.prepareSearch(logIndexPrefix + "*")
-                    .setQuery(query)
-                    .setTypes(LOG_DOC_TYPE)
-                    .addSort(builder);
-=======
             String docType = StringUtils.isBlank(docTypeOverride) ? LOG_DOC_TYPE : docTypeOverride;
             final SearchRequestBuilder srb = elasticSearchClient.prepareSearch(logIndexPrefix + "*")
                 .setQuery(query)
                 .setTypes(docType)
                 .setSize(config.getElasticSearchTasklogLimit())
                 .addSort(SortBuilders.fieldSort("createdTime").order(SortOrder.ASC));
->>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
 
             return mapTaskExecLogsResponse(srb.execute().actionGet());
         } catch (Exception e) {
