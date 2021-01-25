@@ -4,11 +4,18 @@ The task takes 3 parameters:
 
 **Parameters:**
 
-|name|description|
-|---|---|
-|caseValueParam |Name of the parameter in task input whose value will be used as a switch.|
-|decisionCases|Map where key is possible values of ```caseValueParam``` with value being list of tasks to be executed.|
-|defaultCase|List of tasks to be executed when no matching value if found in decision case (default condition)|
+|name|type|description|
+|---|---|---|
+|caseValueParam|String|Name of the parameter in task input whose value will be used as a switch.|
+|decisionCases|Map[String, List[task]]|Map where key is possible values of ```caseValueParam``` with value being list of tasks to be executed.|
+|defaultCase|List[task]|List of tasks to be executed when no matching value if found in decision case (default condition)|
+|caseExpression|String|Case expression to use instead of caseValueParam when the case should depend on complex values. This is a Javascript expression evaluated by the Nashorn Engine. Task names with arithmetic operators should not be used.|
+
+**Outputs:**
+
+|name|type|description|
+|---|---|---|
+|caseOutput|List[String]|A List of string representing the list of cases that matched.|
 
 **Example**
 
@@ -68,17 +75,30 @@ Event task provides ability to publish an event (message) to either Conductor or
 
 **Parameters:**
 
-|name|description|
-|---|---|
-| sink |Qualified name of the event that is produced.  e.g. conductor or sqs:sqs_queue_name|
-| asyncComplete |```false``` to mark status COMPLETED upon execution ; ```true``` to keep it IN_PROGRESS, wait for an external event (via Conductor or SQS or EventHandler) to complete it.
+|name|type|description|
+|---|---|---|
+| sink | String | Qualified name of the event that is produced.  e.g. conductor or sqs:sqs_queue_name|
+| asyncComplete | Boolean | ```false``` to mark status COMPLETED upon execution ; ```true``` to keep it IN_PROGRESS, wait for an external event (via Conductor or SQS or EventHandler) to complete it. |
 
+**Outputs:**
+
+|name|type|description|
+|---|---|---|
+| workflowInstanceId | String | Workflow id |
+| workflowType | String | Workflow Name | 
+| workflowVersion | Integer | Workflow Version |
+| correlationId | String | Workflow CorrelationId |
+| sink | String | Copy of the input data "sink" |
+| asyncComplete | Boolean | Copy of the input data "asyncComplete |
+| event_produced | String | Name of the event produced |
+
+The published event's payload is identical to the output of the task (except "event_produced").
 
 **Example**
 
 ``` json
 {
-	"sink": "sqs:example_sqs_queue_name"
+	"sink": "sqs:example_sqs_queue_name",
 	"asyncComplete": false
 }
 ```
@@ -97,41 +117,40 @@ For SQS, use the **name** of the queue and NOT the URI.  Conductor looks up the 
 * SQS
 
 
-**Event Task Input**
-The input given to the event task is made available to the published message as payload.  e.g. if a message is put into SQS queue (sink is sqs) then the message payload will be the input to the task.
-
-
-**Event Task Output**
-
-`event_produced` Name of the event produced.
-
-
-
 ## HTTP
 An HTTP task is used to make calls to another microservice over HTTP.
 
 **Parameters:**
 
-The task expects an input parameter named ```http_request``` as part of the task's input with the following details:
+|name|type|description|
+|---|---|---|
+| http_request | HttpRequest | JSON object (see below) |
 
-|name|description|
-|---|---|
-| uri |URI for the service.  Can be a partial when using vipAddress or includes the server address.|
-|method|HTTP method.  One of the GET, PUT, POST, DELETE, OPTIONS, HEAD|
-|accept|Accept header as required by server.|
-|contentType|Content Type - supported types are text/plain, text/html and, application/json|
-|headers|A map of additional http headers to be sent along with the request.|
-|body|Request body|
-|vipAddress|When using discovery based service URLs.|
-| asyncComplete |```false``` to mark status COMPLETED upon execution ; ```true``` to keep it IN_PROGRESS, wait for an external event (via Conductor or SQS or EventHandler) to complete it.
+```HttpRequest``` JSON object:
 
-**HTTP Task Output**
+|name|type|description|
+|---|---|---|
+| uri | String | URI for the service.  Can be a partial when using vipAddress or includes the server address.|
+| method | String | HTTP method.  One of the GET, PUT, POST, DELETE, OPTIONS, HEAD|
+| accept | String | Accept header as required by server. Defaults to ```application/json``` |
+| contentType | String | Content Type - supported types are ```text/plain```, ```text/html```, and ```application/json``` (Default)|
+| headers| Map[String, Any] | A map of additional http headers to be sent along with the request.|
+| body| Map[] | Request body |
+| vipAddress | String | When using discovery based service URLs.|
+| asyncComplete | Boolean | ```false``` to mark status COMPLETED upon execution ; ```true``` to keep it IN_PROGRESS, wait for an external event (via Conductor or SQS or EventHandler) to complete it.
+| oauthConsumerKey | String | [OAuth](https://oauth.net/core/1.0/) client consumer key  |
+| oauthConsumerSecret | String | [OAuth](https://oauth.net/core/1.0/) client consumer secret |
+| connectionTimeOut | Integer | Connection Time Out in milliseconds. If set to 0, equivalent to infinity. Default: 100. |
+| readTimeOut | Integer | Read Time Out in milliseconds. If set to 0, equivalent to infinity. Default: 150. |
 
-|name|description|
-|---|---|
-|response|JSON body containing the response if one is present|
-|headers|Response Headers|
-|statusCode|Integer status code|
+**Output:**
+
+|name|type|description|
+|---|---|---|
+| response | Map |  JSON body containing the response if one is present |
+| headers | Map[String, Any] | Response Headers |
+| statusCode | Integer | [Http Status Code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) |
+| reasonPhrase | String | Http Status Code's reason phrase |
 
 **Example**
 
@@ -165,40 +184,80 @@ The task is marked as ```FAILED``` if the request cannot be completed or the rem
 	HTTP task currently only supports Content-Type as application/json and is able to parse the text as well as JSON response.  XML input/output is currently not supported.  However, if the response cannot be parsed as JSON or Text, a string representation is stored as a text value.
 
 
-
 ## Sub Workflow
 Sub Workflow task allows for nesting a workflow within another workflow.
 
 **Parameters:**
 
-|name|description|
-|---|---|
-| subWorkflowParam |name and version of the Workflow to be executed as Sub Workflow. Input to this Task will be forwarded to SubWorflow as Workflow input|
+|name|type|description|
+|---|---|---|
+| subWorkflowParam | Map[String, Any] | See below |
+| inputParameters | Map[String, Any] | `input` of the sub workflow |
+
+**subWorkflowParam**
+
+|name|type|description|
+|---|---|---|
+| name | String | Name of the workflow to execute |
+| version | Integer | Version of the workflow to execute |
+| taskToDomain | Map[String, String] | Allows scheduling the sub workflow's tasks per given mappings. See [Task Domains](configuration/taskdomains/) for instructions to configure taskDomains. |
+| workflowDefinition | [WorkflowDefinition](configuration/workflowdef/) | Allows starting a subworkflow with a dynamic workflow definition. |
+
+**Outputs:**
+
+|name|type|description|
+|---|---|---|
+| subWorkflowId | String | Subworkflow execution Id generated when running the subworkflow |
 
 **Example**
 
 ```json
 {
-  "name": "sub_workflow_task",
-  "taskReferenceName": "sub1",
-  "inputParameters": {
-    "requestId": "${workflow.input.requestId}",
-    "file": "${encode.output.location}"
-  },
-  "type": "SUB_WORKFLOW",
-  "subWorkflowParam": {
-    "name": "deployment_workflow",
-    "version": 1
-  }
+	"name": "sub_workflow_task",
+	"taskReferenceName": "sub1",
+	"type": "SUB_WORKFLOW",
+	"inputParameters": {
+		"anything": "${workflow.input.anythingValue}"
+	},
+	"subWorkflowParam": {
+		"name": "deployment_workflow",
+		"version": 1,
+		"taskToDomain": {
+			"*": "mydomain"
+		},
+		"workflowDefinition": {
+			"name": "deployment_workflow",
+			"description": "Deploys to CDN",
+			"version": 1,
+			"tasks": [{
+				"name": "deploy",
+				"taskReferenceName": "d1",
+				"type": "SIMPLE",
+				"inputParameters": {
+					"fileLocation": "${workflow.input.encodeLocation}"
+				}
+			}],
+			"outputParameters": {
+				"cdn_url": "${d1.output.location}"
+			},
+			"failureWorkflow": "cleanup_encode_resources",
+			"restartable": true,
+			"workflowStatusListenerEnabled": true,
+			"schemaVersion": 2
+		}
+	}
 }
 ```
-When executed, a ```deployment_workflow``` is executed with two input parameters requestId and _file_.  The task is marked as completed upon the completion of the spawned workflow.  If the sub-workflow is terminated or fails the task is marked as failure and retried if configured. 
 
+When executed, a ```deployment_workflow``` is executed with its inputs parameters set
+to the inputParameters of the ```sub_workflow_task``` and the workflow definition specified.  
+The task is marked as completed upon the completion of the spawned workflow. 
+If the sub-workflow is terminated or fails the task is marked as failure and retried if configured. 
 
 
 ## Fork
 
-Fork is used to schedule parallel set of tasks.
+Fork is used to schedule parallel set of tasks, specified by ```"type":"FORK_JOIN"```.
 
 **Parameters:**
 
@@ -208,34 +267,58 @@ Fork is used to schedule parallel set of tasks.
 
 **Example**
 
-``` json
-{
-  "forkTasks": [
-    [
-      {
-        "name": "task11",
-        "taskReferenceName": "t11"
-      },
-      {
-        "name": "task12",
-        "taskReferenceName": "t12"
-      }
-    ],
-    [
-      {
-        "name": "task21",
-        "taskReferenceName": "t21"
-      },
-      {
-        "name": "task22",
-        "taskReferenceName": "t22"
-      }
-    ]
-  ]
-}
-```
-When executed, _task11_ and _task21_ are scheduled to be executed at the same time.
+```json
+[
+    {
+        "name": "fork_join",
+        "taskReferenceName": "forkx",
+        "type": "FORK_JOIN",
+        "forkTasks": [
+          [
+            {
+              "name": "task_10",
+              "taskReferenceName": "task_A",
+              "type": "SIMPLE"
+            },
+            {
+              "name": "task_11",
+              "taskReferenceName": "task_B",
+              "type": "SIMPLE"
+            }
+          ],
+          [
+            {
+              "name": "task_21",
+              "taskReferenceName": "task_Y",
+              "type": "SIMPLE"
+            },
+            {
+              "name": "task_22",
+              "taskReferenceName": "task_Z",
+              "type": "SIMPLE"
+            }
+          ]
+        ]
+    },
+    {
+        "name": "join",
+        "taskReferenceName": "join2",
+        "type": "JOIN",
+        "joinOn": [
+          "task_B",
+          "task_Z"
+        ]
+    }
+]
 
+```
+
+When executed, _task_A_ and _task_Y_ are scheduled to be executed at the same time.
+
+!!! Note "Fork and Join"
+	**A Join task MUST follow FORK_JOIN**
+	
+	Workflow definition MUST include a Join task definition followed by FORK_JOIN task. Forked task can be a Sub Workflow, allowing for more complex execution flows.
 
 
 ## Dynamic Fork
@@ -295,13 +378,12 @@ Consider **taskA**'s output as:
 ```
 When executed, the dynamic fork task will schedule two parallel task of type "encode_task" with reference names "forkedTask1" and "forkedTask2" and inputs as specified by _ dynamicTasksInputJSON_
 
-!!!warning "Dynamic Fork and Join"
+!!! Note "Dynamic Fork and Join"
 	**A Join task MUST follow FORK_JOIN_DYNAMIC**
 	
 	Workflow definition MUST include a Join task definition followed by FORK_JOIN_DYNAMIC task.  However, given the dynamic nature of the task, no joinOn parameters are required for this Join.  The join will wait for ALL the forked branches to complete before completing.
 	
 	Unlike FORK, which can execute parallel flows with each fork executing a series of tasks in  sequence, FORK_JOIN_DYNAMIC is limited to only one task per fork.  However, forked task can be a Sub Workflow, allowing for more complex execution flows.
-
 
 
 ## Join
@@ -324,6 +406,7 @@ Join task is used to wait for completion of one or more tasks spawned by fork ta
 
 **Join Task Output**
 Fork task's output will be a JSON object with key being the task reference name and value as the output of the fork task.
+
 
 ## Exclusive Join
 Exclusive Join task helps capture Task output from Decision Task's flow.
@@ -400,6 +483,7 @@ GET /queue
 }
 ```
 
+
 ## Dynamic Task
 
 Dynamic Task allows to execute one of the registered Tasks dynamically at run-time. It accepts the task name to execute in inputParameters.
@@ -434,9 +518,20 @@ This is particularly helpful in running simple evaluations in Conductor server, 
 
 **Parameters:**
 
-|name|description|Notes|
+|name|type|description|notes|
+|---|---|---|---|
+|scriptExpression|String|Javascript (`Nashorn`) evaluation expression defined as a string. Must return a value.|Must be non-empty.|
+
+Besides `scriptExpression`, any value is accessible as `$.value` for the `scriptExpression` to evaluate.
+
+**Outputs:**
+
+|name|type|description|
 |---|---|---|
-|scriptExpression|Javascript (`Nashorn`) evaluation expression defined as a string. Must return a value.|Must be non-empty String.|
+|result|Map|Contains the output returned by the `scriptExpression`|
+
+The task output can then be referenced in downstream tasks like:
+```"${lambda_test.output.result.testvalue}"```
 
 **Example**
 ``` json
@@ -451,9 +546,6 @@ This is particularly helpful in running simple evaluations in Conductor server, 
 }
 ```
 
-The task output can then be referenced in downstream tasks like:
-```"${lambda_test.output.result.testvalue}"```
-
 
 ## Terminate Task
 
@@ -463,10 +555,16 @@ For example, if you have a decision where the first condition is met, you want t
 
 **Parameters:**
 
-|name|description|Notes|
+|name|type|description|notes|
+|---|---|---|---|
+|terminationStatus|String|can only accept "COMPLETED" or "FAILED"|task cannot be optional|
+|workflowOutput|Any|Expected workflow output||
+
+**Outputs:**
+
+|name|type|description|
 |---|---|---|
-|terminationStatus|can only accept "COMPLETED" or "FAILED"|task cannot be optional|
-|workflowOutput|Expected workflow output||
+|output|Map|The content of `workflowOutput` from the inputParameters. An empty object if `workflowOutput` is not set.|
 
 ```json
 {
@@ -481,3 +579,289 @@ For example, if you have a decision where the first condition is met, you want t
   "optional": false
 }
 ```
+
+
+## Kafka Publish Task
+
+A kafka Publish task is used to push messages to another microservice via kafka.
+
+**Parameters:**
+
+|name|type|description|
+|---|---|---|
+| kafka_request | kafkaRequest | JSON object (see below) |
+| asyncComplete | Boolean | ```false``` to mark status COMPLETED upon execution ; ```true``` to keep it IN_PROGRESS, wait for an external event (via Conductor or SQS or EventHandler) to complete it. |
+
+```kafkaRequest``` JSON object:
+
+|name|description|
+|---|---|
+| bootStrapServers |bootStrapServers for connecting to given kafka.|
+|key|Key to be published|
+|keySerializer | Serializer used for serializing the key published to kafka.  One of the following can be set : <br/> 1. org.apache.kafka.common.serialization.IntegerSerializer<br/>2. org.apache.kafka.common.serialization.LongSerializer<br/>3. org.apache.kafka.common.serialization.StringSerializer. <br/>Default is String serializer  |
+|value| Value published to kafka|
+|requestTimeoutMs| Request timeout while publishing to kafka. If this value is not given the value is read from the property `kafka.publish.request.timeout.ms`. If the property is not set the value defaults to 100 ms |
+|maxBlockMs| maxBlockMs while publishing to kafka. If this value is not given the value is read from the property `kafka.publish.max.block.ms`. If the property is not set the value defaults to 500 ms |
+|headers|A map of additional kafka headers to be sent along with the request.|
+|topic|Topic to publish|
+
+The producer created in the kafka task is cached. By default the cache size is 10 and expiry time is 120000 ms. To change the defaults following can be modified kafka.publish.producer.cache.size,kafka.publish.producer.cache.time.ms respectively.  
+
+**Example**
+
+Task sample
+
+```json
+{
+  "name": "call_kafka",
+  "taskReferenceName": "call_kafka",
+  "inputParameters": {
+    "asyncComplete": false,
+    "kafka_request": {
+      "topic": "userTopic",
+      "value": "Message to publish",
+      "bootStrapServers": "localhost:9092",
+      "headers": {
+  	"x-Auth":"Auth-key"    
+      },
+      "key": "123",
+      "keySerializer": "org.apache.kafka.common.serialization.IntegerSerializer"
+    }
+  },
+  "type": "KAFKA_PUBLISH"
+}
+```
+
+The task is marked as ```FAILED``` if the message could not be published to the Kafka queue. 
+
+
+## Do While Task
+
+Sequentially execute a list of task as long as a condition is true. The list of tasks is executed first, before the condition is
+checked (even for the first iteration).
+
+When scheduled, each task of this loop will see its `taskReferenceName` concatenated with `__i`, with `i` being the
+iteration number, starting at 1. Warning: `taskReferenceName` containing arithmetic operators must not be used.
+
+Each task output is stored as part of the `DO_WHILE` task, indexed by the iteration value (see example below), allowing
+the condition to reference the output of a task for a specific iteration (eg. ```$.LoopTask['iteration]['first_task']```)
+
+The `DO_WHILE` task is set to `FAILED` as soon as one of the loopTask fails. In such case retry, iteration starts from 1.
+
+Limitations:
+ - Domain or isolation group execution is unsupported;
+ - Nested `DO_WHILE` is unsupported;
+ - `SUB_WORKFLOW` is unsupported;
+ - Since loopover tasks will be executed in loop inside scope of parent do while task, crossing branching outside of DO_WHILE
+   task is not respected. Branching inside loopover task is supported.
+
+**Parameters:**
+
+|name|type|description|
+|---|---|---|
+|loopCondition|String|Condition to be evaluated after every iteration. This is a Javascript expression, evaluated using the Nashorn engine. If an exception occurs during evaluation, the DO_WHILE task is set to FAILED_WITH_TERMINAL_ERROR.|
+|loopOver|List[Task]|List of tasks that needs to be executed as long as the condition is true.|
+
+**Outputs:**
+
+|name|type|description|
+|---|---|---|
+|iteration|Integer|Iteration number: the current one while executing; the final one once the loop is finished|
+|`i`|Map[String, Any]|Iteration number as a string, mapped to the task references names and their output.|
+|*|Any|Any state can be stored here if the `loopCondition` does so. For example `storage` will exist if `loopCondition` is `if ($.LoopTask['iteration'] <= 10) {$.LoopTask.storage = 3; true } else {false}`|
+
+**Example**
+
+The following definition:
+```json
+{
+    "name": "Loop Task",
+    "taskReferenceName": "LoopTask",
+    "type": "DO_WHILE",
+    "inputParameters": {
+      "value": "${workflow.input.value}"
+    },
+    "loopCondition": "if ( ($.LoopTask['iteration'] < $.value ) || ( $.first_task['response']['body'] > 10)) { false; } else { true; }",
+    "loopOver": [
+        {
+            "name": "first task",
+            "taskReferenceName": "first_task",
+            "inputParameters": {
+                "http_request": {
+                    "uri": "http://localhost:8082",
+                    "method": "POST"
+                }
+            },
+            "type": "HTTP"
+        },{
+            "name": "second task",
+            "taskReferenceName": "second_task",
+            "inputParameters": {
+                "http_request": {
+                    "uri": "http://localhost:8082",
+                    "method": "POST"
+                }
+            },
+            "type": "HTTP"
+        }
+    ],
+    "startDelay": 0,
+    "optional": false
+}
+```
+
+will produce the following execution, assuming 3 executions occurred (alongside `first_task__1`, `first_task__2`, `first_task__3`,
+`second_task__1`, `second_task__2` and `second_task__3`):
+
+```json
+{
+    "taskType": "DO_WHILE",
+    "outputData": {
+        "iteration": 3,
+        "1": {
+            "first_task": {
+                "response": {},
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            },
+            "second_task": {
+                "response": {},
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+        },
+        "2": {
+            "first_task": {
+                "response": {},
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            },
+            "second_task": {
+                "response": {},
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+        },
+        "3": {
+            "first_task": {
+                "response": {},
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            },
+            "second_task": {
+                "response": {},
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+        }
+    }
+}
+```
+
+## JSON JQ Transform Task
+
+JSON JQ Transform task allows transforming a JSON input to another JSON structure using a query expression.
+
+Check the [Jq manual](https://stedolan.github.io/jq/manual/v1.5/), and the [Jq playground](https://jqplay.org/)
+for more information.
+
+Limitations:
+ - The java implementation support most, but not all jq functions. See [the lib](https://github.com/eiiches/jackson-jq) for details.
+
+**Parameters:**
+
+|name|type|description|
+|---|---|---|
+|queryExpression|String|JQ query expression. Input is the entire `inputParameters` object.|
+
+**Outputs:**
+
+|name|type|description|
+|---|---|---|
+|result|Any|First result returned by the jq expression|
+|resultList|List[Any]|List of all results returned by the jq expression|
+|error|String|Error, if the query throws an error.|
+
+**Example**
+
+The following definition:
+```json
+{
+    "name": "jq_1",
+    "taskReferenceName": "jq_1",
+    "type": "JSON_JQ_TRANSFORM",
+    "inputParameters": {
+    "in1": {
+      "arr": [ "a", "b" ]
+    },
+    "in2": {
+      "arr": [ "c", "d" ]
+    },
+    "queryExpression": "{ out: (.in1.arr + .in2.arr) }"
+    }
+}
+```
+
+will produce the following execution:
+
+```json
+{
+    "name": "jq_1",
+    "type": "task-execution",
+    "taskReferenceName": "jq_1",
+    "taskType": "JSON_JQ_TRANSFORM",
+    "inputData": {
+        "in1": {
+          "arr": [ "a", "b" ]
+        },
+        "in2": {
+          "arr": [ "c", "d" ]
+        },
+        "queryExpression": "{ out: (.in1.arr + .in2.arr) }"
+    },
+    "outputData": {
+        "result": {
+            "out": ["a","b","c","d"]
+        },
+        "resultList": [
+            {
+                "out": ["a","b","c","d"]
+            }
+        ]
+    }
+}
+```
+
+
+## Set Variable Task
+
+This task allows to set workflow variables by creating or updating them with new values.
+Variables can be initialized in the workflow definition as well as during the workflow run.
+Once a variable was initialized it can be read or overwritten with a new value by any other task.
+
+!!!warning
+	There is a hard barrier for variables payload size in KB defined in the JVM system properties (`conductor.max.workflow.variables.payload.threshold.kb`) the default value is `256`. Passing this barrier will fail the task and the workflow.
+
+**Parameters:**
+
+The parameters for this task are the variable names with their respective values.
+
+**Example**
+```json
+{
+  "type": "SET_VARIABLE",
+  "name": "set_stage_start",
+  "taskReferenceName": "set_stage_start",
+  "inputParameters": {
+    "stage": "START"
+  }
+}
+```
+
+Later in that workflow, the variable can be referenced by `"${workflow.variables.stage}"`

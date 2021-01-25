@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Netflix, Inc.
+ * Copyright 2020 Netflix, Inc.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,33 +55,40 @@ import java.util.stream.Collectors;
  * @author Viren
  * Event Processor is used to dispatch actions based on the incoming events to execution queue.
  */
-public class SimpleEventProcessor implements EventProcessor{
+public class SimpleEventProcessor implements EventProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleEventProcessor.class);
     private static final String className = SimpleEventProcessor.class.getSimpleName();
     private static final int RETRY_COUNT = 3;
-
 
     private final MetadataService metadataService;
     private final ExecutionService executionService;
     private final ActionProcessor actionProcessor;
     private final EventQueues eventQueues;
 
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
     private final Map<String, ObservableQueue> eventToQueueMap = new ConcurrentHashMap<>();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private final JsonUtils jsonUtils;
+    private final boolean isEventMessageIndexingEnabled;
 
     @Inject
-    public SimpleEventProcessor(ExecutionService executionService, MetadataService metadataService,
-                                ActionProcessor actionProcessor, EventQueues eventQueues, JsonUtils jsonUtils, Configuration config) {
+    public SimpleEventProcessor(ExecutionService executionService,
+                                MetadataService metadataService,
+                                ActionProcessor actionProcessor,
+                                EventQueues eventQueues,
+                                JsonUtils jsonUtils,
+                                Configuration configuration,
+                                ObjectMapper objectMapper) {
         this.executionService = executionService;
         this.metadataService = metadataService;
         this.actionProcessor = actionProcessor;
         this.eventQueues = eventQueues;
+        this.objectMapper = objectMapper;
         this.jsonUtils = jsonUtils;
 
-        int executorThreadCount = config.getIntProperty("workflow.event.processor.thread.count", 2);
+        this.isEventMessageIndexingEnabled = configuration.isEventMessageIndexingEnabled();
+        int executorThreadCount = configuration.getIntProperty("workflow.event.processor.thread.count", 2);
         if (executorThreadCount > 0) {
             executorService = Executors.newFixedThreadPool(executorThreadCount);
             refresh();
@@ -89,6 +96,7 @@ public class SimpleEventProcessor implements EventProcessor{
             logger.info("Event Processing is ENABLED. executorThreadCount set to {}", executorThreadCount);
         } else {
             logger.warn("Event processing is DISABLED. executorThreadCount set to {}", executorThreadCount);
+            executorService = null;
         }
     }
 
@@ -113,7 +121,7 @@ public class SimpleEventProcessor implements EventProcessor{
 
     private void refresh() {
         try {
-            Set<String> events = metadataService.getEventHandlers().stream()
+            Set<String> events = metadataService.getAllEventHandlers().stream()
                     .map(EventHandler::getEvent)
                     .collect(Collectors.toSet());
 
@@ -140,24 +148,27 @@ public class SimpleEventProcessor implements EventProcessor{
         queue.observe().subscribe((Message msg) -> handle(queue, msg));
     }
 
-    @SuppressWarnings({"unchecked"})
-    private void handle(ObservableQueue queue, Message msg) {
+    protected void handle(ObservableQueue queue, Message msg) {
         try {
-            executionService.addMessage(queue.getName(), msg);
-
+            if (isEventMessageIndexingEnabled) {
+                executionService.addMessage(queue.getName(), msg);
+            }
             String event = queue.getType() + ":" + queue.getName();
             logger.debug("Evaluating message: {} for event: {}", msg.getId(), event);
             List<EventExecution> transientFailures = executeEvent(event, msg);
 
             if (transientFailures.isEmpty()) {
                 queue.ack(Collections.singletonList(msg));
+                logger.debug("Message: {} acked on queue: {}", msg.getId(), queue.getName());
             } else if (queue.rePublishIfNoAck()) {
                 // re-submit this message to the queue, to be retried later
                 // This is needed for queues with no unack timeout, since messages are removed from the queue
                 queue.publish(Collections.singletonList(msg));
+                logger.debug("Message: {} published to queue: {}", msg.getId(), queue.getName());
             }
         } catch (Exception e) {
             logger.error("Error handling message: {} on queue:{}", msg, queue.getName(), e);
+            Monitors.recordEventQueueMessagesError(queue.getType(), queue.getName());
         } finally {
             Monitors.recordEventQueueMessagesHandled(queue.getType(), queue.getName());
         }
@@ -169,7 +180,7 @@ public class SimpleEventProcessor implements EventProcessor{
      *
      * @return a list of {@link EventExecution} that failed due to transient failures.
      */
-    private List<EventExecution> executeEvent(String event, Message msg) throws Exception {
+    protected List<EventExecution> executeEvent(String event, Message msg) throws Exception {
         List<EventHandler> eventHandlerList = metadataService.getEventHandlersForEvent(event, true);
         Object payloadObject = getPayloadObject(msg.getPayload());
 
@@ -197,14 +208,24 @@ public class SimpleEventProcessor implements EventProcessor{
             CompletableFuture<List<EventExecution>> future = executeActionsForEventHandler(eventHandler, msg);
             future.whenComplete((result, error) -> result.forEach(eventExecution -> {
                 if (error != null || eventExecution.getStatus() == Status.IN_PROGRESS) {
-                    executionService.removeEventExecution(eventExecution);
                     transientFailures.add(eventExecution);
                 } else {
                     executionService.updateEventExecution(eventExecution);
                 }
             })).get();
         }
-        return transientFailures;
+        return processTransientFailures(transientFailures);
+    }
+
+    /**
+     * Remove the event executions which failed temporarily.
+     *
+     * @param eventExecutions The event executions which failed with a transient error.
+     * @return The event executions which failed with a transient error.
+     */
+    protected List<EventExecution> processTransientFailures(List<EventExecution> eventExecutions) {
+        eventExecutions.forEach(executionService::removeEventExecution);
+        return eventExecutions;
     }
 
     /**
@@ -212,7 +233,7 @@ public class SimpleEventProcessor implements EventProcessor{
      * @param msg          the {@link Message} that triggered the event
      * @return a {@link CompletableFuture} holding a list of {@link EventExecution}s for the {@link Action}s executed in the event handler
      */
-    private CompletableFuture<List<EventExecution>> executeActionsForEventHandler(EventHandler eventHandler, Message msg) {
+    protected CompletableFuture<List<EventExecution>> executeActionsForEventHandler(EventHandler eventHandler, Message msg) {
         List<CompletableFuture<EventExecution>> futuresList = new ArrayList<>();
         int i = 0;
         for (Action action : eventHandler.getActions()) {
@@ -235,13 +256,12 @@ public class SimpleEventProcessor implements EventProcessor{
     /**
      * @param eventExecution the instance of {@link EventExecution}
      * @param action         the {@link Action} to be executed for the event
-     * @param payload        the {@link Message#payload}
+     * @param payload        the {@link Message#getPayload()}
      * @return the event execution updated with execution output, if the execution is completed/failed with non-transient error
      * the input event execution, if the execution failed due to transient error
      */
-    @SuppressWarnings("Guava")
     @VisibleForTesting
-    EventExecution execute(EventExecution eventExecution, Action action, Object payload) {
+    protected EventExecution execute(EventExecution eventExecution, Action action, Object payload) {
         try {
             String methodName = "executeEventAction";
             String description = String.format("Executing action: %s for event: %s with messageId: %s with payload: %s", action.getAction(), eventExecution.getId(), eventExecution.getMessageId(), payload);
@@ -253,12 +273,14 @@ public class SimpleEventProcessor implements EventProcessor{
                 eventExecution.getOutput().putAll(output);
             }
             eventExecution.setStatus(Status.COMPLETED);
+            Monitors.recordEventExecutionSuccess(eventExecution.getEvent(), eventExecution.getName(), eventExecution.getAction().name());
         } catch (RuntimeException e) {
             logger.error("Error executing action: {} for event: {} with messageId: {}", action.getAction(), eventExecution.getEvent(), eventExecution.getMessageId(), e);
             if (!isTransientException(e.getCause())) {
                 // not a transient error, fail the event execution
                 eventExecution.setStatus(Status.FAILED);
                 eventExecution.getOutput().put("exception", e.getMessage());
+                Monitors.recordEventExecutionError(eventExecution.getEvent(), eventExecution.getName(), eventExecution.getAction().name(), e.getClass().getSimpleName());
             }
         }
         return eventExecution;
@@ -272,7 +294,7 @@ public class SimpleEventProcessor implements EventProcessor{
      * @return true - if the exception is a transient failure
      * false - if the exception is non-transient
      */
-    private boolean isTransientException(Throwable throwableException) {
+    protected boolean isTransientException(Throwable throwableException) {
         if (throwableException != null) {
             return !((throwableException instanceof UnsupportedOperationException) ||
                     (throwableException instanceof ApplicationException && ((ApplicationException) throwableException).getCode() != ApplicationException.Code.BACKEND_ERROR));

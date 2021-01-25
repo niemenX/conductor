@@ -17,6 +17,7 @@
 package com.netflix.conductor.core.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.conductor.common.utils.JsonMapperProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class JsonUtils {
     private static final Logger logger = LoggerFactory.getLogger(JsonUtils.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new JsonMapperProvider().get();
 
     public JsonUtils() {
     }
@@ -91,7 +92,10 @@ public class JsonUtils {
         try {
             return objectMapper.readValue(jsonAsString, Object.class);
         } catch (Exception e) {
+<<<<<<< HEAD
             logger.debug("Unable to parse (json?) string: {}", jsonAsString, e);
+=======
+>>>>>>> e7e42390f4594c70ca43170dc1af02e6c25b8052
             return jsonAsString;
         }
     }
